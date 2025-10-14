@@ -17,9 +17,28 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+    public async Task<ActionResult<IEnumerable<Product>>> GetProducts([FromQuery] string? slug)
     {
-        var products = await _context.Products.ToListAsync();
+        var query = _context.Products.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(slug))
+        {
+            query = query.Where(p => p.UrlSlug == slug);
+        }
+
+        var products = await query.ToListAsync();
+
         return Ok(products);
     }
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<Product>> GetProductByID(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+        if (product == null)
+            return NotFound();
+
+        return Ok(product);
+    }
+
 }
