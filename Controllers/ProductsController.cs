@@ -2,6 +2,8 @@
 using BackendAPI.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BackendAPI.Contracts.Products;
+using BackendAPI.Common;
 
 namespace BackendAPI.Controllers;
 
@@ -39,6 +41,37 @@ public class ProductsController : ControllerBase
             return NotFound();
 
         return Ok(product);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ProductListDto>> CreateProduct([FromBody] ProductCreateDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            return BadRequest("Product name is required.");
+
+        var product = new Product
+        {
+            Name = dto.Name,
+            Description = dto.Description,
+            Price = dto.Price,
+            Image = dto.Image,
+            UrlSlug = dto.Name.ToUrlSlug()
+        };
+
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync();
+
+        var result = new ProductListDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            Image = product.Image,
+            UrlSlug = product.UrlSlug
+        };
+
+        return CreatedAtAction(nameof(GetProductByID), new { id = product.Id }, result);
     }
 
 }

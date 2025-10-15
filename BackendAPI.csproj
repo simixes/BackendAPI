@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="Contracts\Categories\" />
-    <Folder Include="Contracts\Products\" />
   </ItemGroup>
 
 </Project>
