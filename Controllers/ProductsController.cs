@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.Contracts.Products;
 using BackendAPI.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackendAPI.Controllers;
 
@@ -71,6 +72,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<ProductListDto>> CreateProduct([FromBody] ProductCreateDto dto)
     {
@@ -102,6 +104,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetProductByID), new { id = product.Id }, result);
     }
 
+    [Authorize]
     [HttpDelete("{id:int}")]
 
     public async Task<IActionResult> DeleteProduct(int id)
@@ -117,6 +120,7 @@ public class ProductsController : ControllerBase
         return NoContent(); 
     }
 
+    [Authorize]
     [HttpPatch("{id:int}")]
     public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto dto)
     {
