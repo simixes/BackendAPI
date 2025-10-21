@@ -19,7 +19,10 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProducts([FromQuery] string? slug)
+    public async Task<ActionResult> GetAllProducts(
+    [FromQuery] int? page,
+    [FromQuery] int? pageSize,
+    [FromQuery] string? slug = null)
     {
         var query = _context.Products.AsQueryable();
 
@@ -28,10 +31,35 @@ public class ProductsController : ControllerBase
             query = query.Where(p => p.UrlSlug == slug);
         }
 
-        var products = await query.ToListAsync();
+      
+        if (page == null || pageSize == null)
+        {
+            var allProducts = await query.ToListAsync();
+            return Ok(allProducts);
+        }
 
-        return Ok(products);
+        
+        var totalCount = await query.CountAsync();
+
+        var products = await query
+            .OrderBy(p => p.Id)
+            .Skip((page.Value - 1) * pageSize.Value)
+            .Take(pageSize.Value)
+            .ToListAsync();
+
+        var response = new
+        {
+            totalCount,
+            currentPage = page,
+            pageSize,
+            totalPages = (int)Math.Ceiling(totalCount / (double)pageSize.Value),
+            products
+        };
+
+        return Ok(response);
     }
+
+
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetProductByID(int id)
