@@ -102,6 +102,31 @@ namespace BackendAPI.Controllers
 
             return NoContent();
         }
+
+        
+        [HttpPatch("{id:int}")]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryUpdateDto dto)
+        {
+            var category = await _context.Categories.FindAsync(id);
+
+            if (category == null)
+                return NotFound();
+
+            
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                category.Name = dto.Name;
+                category.Slug = dto.Name.ToUrlSlug();
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Image))
+                category.Image = dto.Image;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
     }
 }
 

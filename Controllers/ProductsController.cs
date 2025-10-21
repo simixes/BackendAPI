@@ -117,4 +117,33 @@ public class ProductsController : ControllerBase
         return NoContent(); 
     }
 
+    [HttpPatch("{id:int}")]
+    public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto dto)
+    {
+        var product = await _context.Products.FindAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        if (!string.IsNullOrWhiteSpace(dto.Name))
+        {
+            product.Name = dto.Name;
+            product.UrlSlug = dto.Name.ToUrlSlug();
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Description))
+            product.Description = dto.Description;
+
+        if (dto.Price.HasValue)
+            product.Price = dto.Price.Value;
+
+        if (!string.IsNullOrWhiteSpace(dto.Image))
+            product.Image = dto.Image;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
 }
